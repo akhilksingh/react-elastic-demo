@@ -20,14 +20,16 @@ services:
   web-app:
     build:
       context: ./client
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     volumes:
       - /app/node_modules
       - ./client:/app
     ports:
-      - '8080:80'
+      - '8080:8080'
     restart: on-failure
     container_name: web-app
+    environment: # Set ENV vars
+     - PORT=8080
   
   elasticsearch: # Elasticsearch Instance
     container_name: es-search
