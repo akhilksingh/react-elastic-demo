@@ -1,18 +1,18 @@
 import React from 'react';
 import { CustomInput, Form, FormGroup, Label, Button, Container } from 'reactstrap';
 
-const Example = ({ handleFileUpload, uploadFile })  => {
+const Example = ({ handleFileSelect, uploadFileToSelectColumn, loaded })  => {
   return (
     <Container>
       <Form>
         <FormGroup>
-          <Label for="exampleCustomFileBrowser">Select File to Upload </Label>
+          <Label for="exampleCustomFileBrowser">Select File and Upload to get File Columns </Label>
           <CustomInput 
-            type="file" 
+            type="file"
             id="exampleCustomFileBrowser" 
             name="customFile" 
             accept= {['.csv','.tsv']}
-            onChange={handleFileUpload}
+            onChange={handleFileSelect}
           />
       </FormGroup>
     </Form>
@@ -20,7 +20,8 @@ const Example = ({ handleFileUpload, uploadFile })  => {
       color="secondary" 
       size="lg" 
       block
-      onClick={uploadFile}
+      disabled={!loaded}
+      onClick={uploadFileToSelectColumn}
       >Upload</Button>
     </Container>
   );

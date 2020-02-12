@@ -26,7 +26,9 @@ class AppNavbar extends Component {
       <div>
         <Navbar color="dark" dark expand="sm" className="mb-5">
           <Container>
-            <NavbarBrand href="/">Elastic Search Query App</NavbarBrand>
+            <NavbarBrand href="/" style= {{ color: "antiquewhite" }}>Elastic Search App</NavbarBrand>
+            <NavbarBrand href="/upload">File Upload</NavbarBrand>
+            <NavbarBrand href="/search">Search</NavbarBrand>
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="ml-auto" navbar>
@@ -40,7 +42,6 @@ class AppNavbar extends Component {
           </Container>
         </Navbar>
       </div>
-
     )
   }
 }

@@ -1,58 +1,131 @@
 import React, { Component } from 'react';
 import FileUpload from '../components/FileUpload';
-import fileReader from '../utils/csvFileReader';
-const csvParser = require('csv-parser');
-const fs = require('fs');
+import ApiService from './apiService';
+import Toaster from '../components/Toaster';
+import styled from 'styled-components';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
+import { Container } from 'reactstrap';
+import FileSelect from '../components/FileSelect';
 
 class FileUploadContainer extends Component {
 
-  state = {
-    file: null,
-    loaded: false
+  constructor(props) {
+    super(props);
+    this.state = {
+      file: null,
+      loaded: false,
+      message: '',
+      columnList: [],
+      selectedColumn: '',
+      columnIndex: '',
+    };
   }
 
-  handleFileUpload = (event) => {
+  
+
+  handleFileSelect = (event) => {
+    // event.preventDefault();
     const file = event.target.files[0];
-    console.log(file);
-    console.log(event.target.value);
     this.setState({
       file,
       loaded: true
     })
   }
 
-  uploadFile = () => {
-    if (this.state.loaded) {
-      const filePath = "./data/dsjVoxArticles.tsv";
-      console.log("Uploading File");
-      // fs.writeFile('/test.txt', 'Cool, I can do this in the browser!', function(err) {
-      //   fs.readFile('/test.txt', function(err, contents) {
-      //     console.log(contents.toString());
-      //   });
-      // });
-      // fs.createReadStream(filePath)
-      //   .on('error',()=>{
-      //     console.log("error in finding file");
-      //   })
-      //   .pipe(csvParser())
-      //   .on('data',(row)=> {
-      //     // use Row Data
-      //     console.log(row);
-      //   })
-      //   .on('end',()=>{
-      //     // handling end of csv
-      //   })
+  uploadFile = async () => {
+    try {
+      if (this.state.loaded) {
+        const res = await ApiService.fileUpload(this.state.file);
+        console.log(res);
+        if (res.status) {
+          this.setState({
+            message: "File Uploaded Successfully"
+          })
+          setTimeout(() =>{
+            this.setState({
+              message: '',
+              loaded: false
+            })
+          }, 5000);
+          };
+      }
+    } catch (error) {
+      console.log(error);
+    } 
+  }
+
+  uploadFileToSelectColumn = async () => {
+    try {
+      if (this.state.loaded) {
+        const res = await ApiService.fileUploadToSelectColumn(this.state.file);
+        console.log(res);
+        if (res.status) {
+          this.setState({
+            message: "File Uploaded Successfully",
+            columnList: res.headerList
+          })
+          setTimeout(() =>{
+            this.setState({
+              message: '',
+              loaded: false,
+            })
+          }, 2000);
+          };
+      }
+    } catch (error) {
+      console.log(error);
+    } 
+  }
+
+  onColumnSelect = (Column, ind) => () => {
+    console.log(Column);
+    console.log("Column selected");
+    this.setState({
+      selectedColumn: Column,
+      columnIndex: ind
+    })
+  }
+
+  buildIndex = async () => {
+    try {
+      if (this.state.selectedColumn) {
+        console.log(this.state.file.name);
+        const res = await ApiService.fileUploadToBuildIndex(this.state.file.name, this.state.selectedColumn, this.state.columnIndex);
+        console.log(res);
+        if (res.status) {
+          this.setState({
+            message: "Index built Successfully",
+          })
+          setTimeout(() =>{
+            this.setState({
+              message: '',
+            })
+          }, 2000);
+          };
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
   render() {
-    console.log(this.state);
     return (
       <div>
-        <FileUpload 
-          handleFileUpload={this.handleFileUpload}
-          uploadFile={this.uploadFile}
-        />
+        {this.state.message && <Toaster message={this.state.message} />}
+          <FileUpload
+            handleFileSelect={this.handleFileSelect}
+            uploadFileToSelectColumn={this.uploadFileToSelectColumn}
+            loaded={this.state.loaded}
+          />
+          {this.state.columnList.length>0 && 
+            <FileSelect 
+              list={this.state.columnList} 
+              onSelect={this.onColumnSelect}
+              selectedColumn={this.state.selectedColumn}
+              buildIndex={this.buildIndex}
+            />}
       </div>
     );
   }
